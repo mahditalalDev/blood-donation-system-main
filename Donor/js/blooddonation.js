@@ -37,7 +37,6 @@ import {
 const db = getFirestore();
 const auth = getAuth();
 // ------------------------------------------------------------------------
-
 const countryInput = document.getElementById("country");
 const provinceInput = document.getElementById("province");
 const cityInput = document.getElementById("city");
@@ -45,197 +44,149 @@ const registerButton = document.getElementById("registerBtn");
 const medicalCenterData = [];
 const medicalCentersSpinner = document.getElementById("medical-centers");
 const infobutton = document.getElementById("info-button");
+const scheduleDateInput = document.getElementById("schedule-date"); 
+const scheduleTimeInput = document.getElementById("schedule-time"); 
+
 getMedicalCentersName();
+
 async function getMedicalCentersName() {
-  const q = query(
-    collection(db, "MedicalCenters"),
-    // where("province", "==", province)
-    // where("bloodType", "==", `O+`)
-  );
-  getDocs(q)
-    .then((querySnapshot) => {
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        medicalCenterData.push({
-          email: doc.id,
-          centerName: doc.data().medicalNameMedicalCenter,
+    const q = query(collection(db, "MedicalCenters"));
+    getDocs(q).then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            medicalCenterData.push({
+                email: doc.id,
+                centerName: doc.data().medicalNameMedicalCenter
+            });
         });
-      });
-      fillSpinnerCentersName(medicalCenterData);
-    })
-    .catch((error) => {
-      console.error("Error getting documents:", error);
+        fillSpinnerCentersName(medicalCenterData);
+    }).catch((error) => {
+        console.error("Error getting documents:", error);
     });
 }
-document.getElementById("city").addEventListener("change",()=>{
-  document.getElementById("medical-centers").innerHTML=``
-  const province = provinceInput.value;
-  const cityInputt=cityInput.value
-  updateMedicalCentersName(province,cityInputt);
 
-})
+document.getElementById("city").addEventListener("change", () => {
+    document.getElementById("medical-centers").innerHTML = ``;
+    const province = provinceInput.value;
+    const cityInputt = cityInput.value;
+    updateMedicalCentersName(province, cityInputt);
+});
+
 document.getElementById("province").addEventListener("change", () => {
-  document.getElementById("medical-centers").innerHTML=``
-  updateCities()
-  
-  
+    document.getElementById("medical-centers").innerHTML = ``;
+    updateCities();
 });
-async function updateMedicalCentersName(province,city){
-  let dataNames=[]
-  
-  const q = query(
-    collection(db, "MedicalCenters"),
-    where("province", "==", province)
-    ,where("city", "==", city)
-  );
-  getDocs(q)
-    .then((querySnapshot) => {
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        dataNames.push({
-          email: doc.id,
-          centerName: doc.data().medicalNameMedicalCenter,
+
+async function updateMedicalCentersName(province, city) {
+    let dataNames = [];
+    const q = query(collection(db, "MedicalCenters"), where("province", "==", province), where("city", "==", city));
+    getDocs(q).then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            dataNames.push({
+                email: doc.id,
+                centerName: doc.data().medicalNameMedicalCenter
+            });
         });
-      });
-      fillSpinnerCentersName(dataNames);
-    })
-    .catch((error) => {
-      console.error("Error getting documents:", error);
+        fillSpinnerCentersName(dataNames);
+    }).catch((error) => {
+        console.error("Error getting documents:", error);
     });
-
 }
+
 medicalCentersSpinner.addEventListener("change", () => {
-  // console.log(document.getElementById("medical-centers").value)
-
-  infobutton.disabled = false;
+    infobutton.disabled = false;
 });
-infobutton.addEventListener("click", () => {
-  let email = medicalCentersSpinner.value;
-  // Construct the URL with the email query parameter
-  let url = "medicaldata.html?email=" + encodeURIComponent(email);
 
-  // Open the new page in a new browser tab/window
-  window.open(url, "_blank");
+infobutton.addEventListener("click", () => {
+    let email = medicalCentersSpinner.value;
+    let url = "medicaldata.html?email=" + encodeURIComponent(email);
+    window.open(url, "_blank");
 });
 
 function fillSpinnerCentersName(data) {
-  let centerName = document.getElementById("medical-centers");
-  for (let center of data) {
-    // console.log(center.email)
-    let content = `<option value="${center.email}">${center.centerName}</option>
-        `;
-    centerName.innerHTML += content;
-  }
+    let centerName = document.getElementById("medical-centers");
+    for (let center of data) {
+        let content = `<option value="${center.email}">${center.centerName}</option>`;
+        centerName.innerHTML += content;
+    }
 }
-// Add event listener to the submit button
+
 registerButton.addEventListener("click", function (event) {
-  // Prevent the default form submission behavior
-  event.preventDefault();
-  let centerName = document.getElementById("medical-centers");
-  let centerEmail = centerName.value;
-  // console.log(center)
-
-  // Retrieve the values from the input fields
-  const country = countryInput.value;
-  const province = provinceInput.value;
-  const city = cityInput.value;
-
-  // Get the value of the checked radio button
-  let bloodQuantity = Number(document.getElementById("blood-units").value);
-
-  // Log the values to the console
-  console.log("Country:", country);
-  // console.log("CenterName", centerName);
-  console.log("CenterEmail:", centerEmail);
-  console.log("Province:", province);
-  console.log("City:", city);
-  console.log("Blood Quantity:", bloodQuantity);
-
-  addDocWithSpecificId(
-    localStorage.getItem("email"),
-    country,
-    province,
-    city,
-    bloodQuantity,
-    centerEmail
-  );
+    event.preventDefault();
+    let centerName = document.getElementById("medical-centers");
+    let centerEmail = centerName.value;
+    const country = countryInput.value;
+    const province = provinceInput.value;
+    const city = cityInput.value;
+    let bloodQuantity = Number(document.getElementById("blood-units").value);
+    const scheduleDate = scheduleDateInput.value; // Capture the schedule date
+    const scheduleTime = scheduleTimeInput.value; // Capture the schedule date
+    addDocWithSpecificId(localStorage.getItem("email"), country, province, city, bloodQuantity, centerEmail, scheduleDate,scheduleTime); // Pass the date to the function
 });
 
-async function addDocWithSpecificId(
-  email,
-  country,
-  province,
-  city,
-  bloodQuantity,
-  centerEmaill
-) {
-  console.log(city, country, province);
-
-  let ref = doc(db, "DonationRequests", email);
-
-  const docref = await setDoc(ref, {
-    email: email,
-    country: country,
-    province: province,
-    city: city,
-    bloodQuantity: bloodQuantity,
-    status: "pending",
-    deleted: "false",
-    centerEmail: centerEmaill,
-  })
-    .then(() => {
-      console.log("added done");
-      alert("thanks for donation");
-      window.location = "./donorhomepage.html";
-    })
-    .catch((err) => {
-      alert(err);
+async function addDocWithSpecificId(email, country, province, city, bloodQuantity, centerEmail, scheduleDate,scheduleTime) {
+    let ref = doc(db, "DonationRequests", email);
+    await setDoc(ref, {
+        email: email,
+        country: country,
+        province: province,
+        city: city,
+        bloodQuantity: bloodQuantity,
+        status: "pending",
+        deleted: "false",
+        centerEmail: centerEmail,
+        scheduleDate: scheduleDate,
+        scheduleTime: scheduleTime,
+    }).then(() => {
+        alert("Thanks for donation");
+        window.location = "./donorhomepage.html";
+    }).catch((err) => {
+        alert(err);
     });
 }
-//-------------
-  function updateCities() {
+
+function updateCities() {
     var provinceSelect = document.getElementById("province");
     var citySelect = document.getElementById("city");
     var province = provinceSelect.value;
-    citySelect.innerHTML = ""; // Clear existing options
+    citySelect.innerHTML = "";
     
-    // Define cities based on selected province
     var cities = [];
     switch (province) {
-      case "Beirut":
-        cities = ["Beirut City", "Achrafieh", "Hamra"];
-        break;
-      case "South Lebanon":
-        cities = ["Tyre", "Sidon", "Jezzine"];
-        break;
-      case "North Lebanon":
-        cities = ["Tripoli", "Bsharri", "Batroun"];
-        break;
-      case "Mount Lebanon":
-        cities = ["Jounieh", "Zahle", "Byblos"];
-        break;
-      case "Bekaa":
-        cities = ["Zahle", "Baalbek", "Rashaya"];
-        break;
-      case "Nabatieh":
-        cities = ["Nabatieh", "Hasbaya", "Bint Jbeil"];
-        break;
-      case "Akkar":
-        cities = ["Halba", "Akkar el Atika", "Kobayat"];
-        break;
-      case "Baabda":
-        cities = ["Baabda", "Aley", "Chouf"];
-        break;
-      case "Baalbek-Hermel":
-        cities = ["Baalbek", "Hermel", "Qaa"];
-        break;
+        case "Beirut":
+            cities = ["Beirut City", "Achrafieh", "Hamra"];
+            break;
+        case "South Lebanon":
+            cities = ["Tyre", "Sidon", "Jezzine"];
+            break;
+        case "North Lebanon":
+            cities = ["Tripoli", "Bsharri", "Batroun"];
+            break;
+        case "Mount Lebanon":
+            cities = ["Jounieh", "Zahle", "Byblos"];
+            break;
+        case "Bekaa":
+            cities = ["Zahle", "Baalbek", "Rashaya"];
+            break;
+        case "Nabatieh":
+            cities = ["Nabatieh", "Hasbaya", "Bint Jbeil"];
+            break;
+        case "Akkar":
+            cities = ["Halba", "Akkar el Atika", "Kobayat"];
+            break;
+        case "Baabda":
+            cities = ["Baabda", "Aley", "Chouf"];
+            break;
+        case "Bint Jbeil":
+            cities = ["Bint Jbeil", "Aitaroun", "Ain Ebel"];
+            break;
     }
     
-    // Populate city select with options
-    cities.forEach(function(city) {
-      var option = document.createElement("option");
-      option.text = city;
-      option.value = city;
-      citySelect.add(option);
-    });
-  }
+    for (var i = 0; i < cities.length; i++) {
+        var option = document.createElement("option");
+        option.value = cities[i];
+        option.text = cities[i];
+        citySelect.appendChild(option);
+    }
+}

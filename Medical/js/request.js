@@ -10,6 +10,7 @@ import {
   signInWithPopup,
   createUserWithEmailAndPassword,
 } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyB5piM8HyYATgWqMPi2U6bwAVz94Q189Bs",
   authDomain: "fir-basics-569a0.firebaseapp.com",
@@ -27,7 +28,7 @@ import {
   getFirestore,
   doc,
   getDoc,
-  getDocs, //get all documents inside one collection
+  getDocs,
   setDoc,
   collection,
   increment,
@@ -39,129 +40,83 @@ import {
   where,
   orderBy,
 } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
 const db = getFirestore();
 const auth = getAuth();
 
 const donationRequestCollectionRef = collection(db, "DonationRequests");
-let datareguest = [];
-document.getElementById("tablebody").innerHTML = "";
 
-getRequests(); // Call getRequests function to populate the table initially
-document.getElementById("sign-out-btn").addEventListener("click", () => {
-  const confirmation = confirm("Are you sure you want to logout?");
-
-  // If user clicks "OK", redirect to index.html
-  if (confirmation) {
-    localStorage.clear();
-    window.location.href = "../index.html";
-  }
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("sign-out-btn").addEventListener("click", signOut);
+  document.getElementById("spinner").addEventListener("change", filterRequests);
+  fetchRequests(); // Initial fetch
 });
-async function getRequests() {
-  let test = [];
-  let center = localStorage.getItem("centerName");
+
+async function fetchRequests() {
+  const centerEmail = localStorage.getItem("email");
   const q = query(
     donationRequestCollectionRef,
-    where("centerEmail", "==", localStorage.getItem("email"))
+    where("centerEmail", "==", centerEmail)
   );
 
   try {
     const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-      test.push({ donorEmail: doc.id, data: doc.data() });
-    });
-    console.log("the test is", test);
-    await getDonorInfo(test);
+    const requests = querySnapshot.docs.map((doc) => ({
+      donorEmail: doc.id,
+      data: doc.data(),
+    }));
+    const donorInfos = await fetchDonorInfo(requests);
+    fillTable(donorInfos);
   } catch (error) {
-    console.error("Error getting documents: ", error);
+    console.error("Error fetching requests:", error);
   }
 }
 
-async function getDonorInfo(test) {
-  let help = [];
-  for (let info of test) {
-    await getSpecificDocument(info);
-  }
-  filltable(help);
-
-  async function getSpecificDocument(info) {
-    let ref = doc(db, "MedicalInfo", info.donorEmail);
-    const docSnap = await getDoc(ref);
-    if (docSnap.exists()) {
-      help.push({ donorInfo: docSnap.data(), reguestInfo: info });
-    } else {
-      console.log("no data");
-    }
-  }
+async function fetchDonorInfo(requests) {
+  const donorInfos = await Promise.all(
+    requests.map(async (request) => {
+      const docRef = doc(db, "MedicalInfo", request.donorEmail);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return { donorInfo: docSnap.data(), requestInfo: request };
+      }
+      return null;
+    })
+  );
+  return donorInfos.filter((info) => info !== null);
 }
 
-function filltable(array) {
-  let content = "";
-  array.forEach((item) => {
-    const { donorInfo, reguestInfo } = item;
-    const status = reguestInfo.data.status;
-    let statusBackground = "";
+function fillTable(requests) {
+  const tableBody = document.getElementById("tablebody");
+  tableBody.innerHTML = "";
 
-    // Set background color based on status
-    switch (status) {
-      case "pending":
-        statusBackground = "color: black;";
-        break;
-      case "rejected":
-        statusBackground = "color: black;";
-        break;
-      case "accepted":
-        statusBackground = "color: black;";
-        break;
-      default:
-        statusBackground = "white"; // Default background color
-        break;
-    }
+  requests.forEach(({ donorInfo, requestInfo }) => {
+    const status = requestInfo.data.status;
+    const statusBackground = getStatusBackground(status);
 
-    content += `
+    tableBody.insertAdjacentHTML(
+      "beforeend",
+      `
       <tr>
         <td>${donorInfo.firstName} ${donorInfo.lastName}</td>
-        <td>${reguestInfo.data.bloodQuantity}</td>
+        <td>${requestInfo.data.bloodQuantity}</td>
         <td>${donorInfo.bloodType}</td>
-        <td>${reguestInfo.data.city}</td>
+        <td>${requestInfo.data.city}</td>
         <td><span style="${statusBackground}">${status}</span></td>
         <td>${donorInfo.phoneNumber}</td>
         <td>
           <button class="more-btn" data-donor-email="${
-            reguestInfo.donorEmail
-          }" data-medical-email="${
-      donorInfo.email
-    }" style="padding:10px;border-radius:5px">more</button>
+            requestInfo.donorEmail
+          }" style="padding:10px;border-radius:5px">More</button>
         </td>
         <td>
           <div id="done-btn" style="display:flex;justify-content:center;gap:5px">
-            ${
-              status === "pending"
-                ? `
-              <button class="accept-btn" data-donor-bloodType="${donorInfo.bloodType}" data-donor-bloodQuantity="${reguestInfo.data.bloodQuantity}" data-donor-email="${reguestInfo.donorEmail}" data-medical-email="${donorInfo.email}" style="color:black;padding:10px;border-radius:5px">accept</button>
-              <button class="reject-btn" data-donor-email="${reguestInfo.donorEmail}" data-medical-email="${donorInfo.email}" style="color:black ;padding:10px;border-radius:5px">reject</button>
-            `
-                : ""
-            }
-            ${
-              status === "accepted"
-                ? `
-              <span style=" padding: 5px; border-radius: 5px;">Accepted</span>
-            `
-                : ""
-            }
-            ${
-              status === "rejected"
-                ? `
-              <span style=" padding: 5px; border-radius: 5px;">rejected</span>
-            `
-                : ""
-            }
+            ${getActionButtons(status, donorInfo, requestInfo)}
           </div>
-          <div id="return-btn"></div>
         </td>
         <td style:"text-align:center" >
         <div  class="reminder-btn"  data-donor-email="${
-          reguestInfo.donorEmail
+          requestInfo.donorEmail
         }" >
         <svg xmlns="http://www.w3.org/2000/svg" width="1.2em" 
         height="1.2em" viewBox="0 0 14 14"><path fill="#4139ac" 
@@ -174,51 +129,54 @@ function filltable(array) {
         </div>
        
          </td>
-      </tr>`;
+        <td>${
+          requestInfo.data.scheduleDate
+            ? new Date(requestInfo.data.scheduleDate).toLocaleDateString()
+            : "N/A"
+        }</td>
+        <td>${
+          requestInfo.data.scheduleTime
+            ? new Date(requestInfo.data.scheduleTime).toLocaleTimeString()
+            : "N/A"
+        }</td>
+      </tr>
+    `
+    );
   });
 
-  document.getElementById("tablebody").innerHTML = content;
+  addEventListeners();
+}
 
-  // Add click event listeners to buttons
+function getStatusBackground(status) {
+  switch (status) {
+    case "pending":
+    case "rejected":
+    case "accepted":
+      return "color: black;";
+    default:
+      return "white";
+  }
+}
+
+function getActionButtons(status, donorInfo, requestInfo) {
+  if (status === "pending") {
+    return `
+      <button class="accept-btn" data-donor-bloodType="${donorInfo.bloodType}" data-donor-bloodQuantity="${requestInfo.data.bloodQuantity}" data-donor-email="${requestInfo.donorEmail}" style="color:black;padding:10px;border-radius:5px">Accept</button>
+      <button class="reject-btn" data-donor-email="${requestInfo.donorEmail}" style="color:black;padding:10px;border-radius:5px">Reject</button>
+    `;
+  } else if (status === "accepted") {
+    return `<span style="padding: 5px; border-radius: 5px;">Accepted</span>`;
+  } else if (status === "rejected") {
+    return `<span style="padding: 5px; border-radius: 5px;">Rejected</span>`;
+  }
+  return "";
+}
+
+function addEventListeners() {
   document.querySelectorAll(".more-btn").forEach((button) => {
     button.addEventListener("click", function () {
       const donorEmail = this.getAttribute("data-donor-email");
-      // const medicalEmail = this.getAttribute("data-medical-email");
-      console.log("Donor Email:", donorEmail);
-      // console.log("Medical Email:", medicalEmail);
       window.open(`../qrreader.html?email=${donorEmail}`, "_blank");
-    });
-  });
-
-  document.querySelectorAll(".accept-btn").forEach((button) => {
-    button.addEventListener("click", function () {
-      const donorEmail = this.getAttribute("data-donor-email");
-      const donorbloodType = this.getAttribute("data-donor-bloodType");
-      const donorbloodQuantity = this.getAttribute("data-donor-bloodQuantity");
-      console.log("this is", donorbloodType, donorbloodQuantity);
-      updateSpecificDocument(donorEmail, "accepted");
-      updateBloodBank("email", donorbloodType, donorbloodQuantity);
-      // let spinnerType = document.getElementById("spinner").value;
-      // switch (spinnerType) {
-      //   case "All":
-      //     getRequests();
-      //     return;
-      //   case "pending":
-      //     getRequestsByStatus("pending");
-      //     return;
-      //   case "accepted":
-      //     getRequestsByStatus("accepted");
-      //     return;
-      //   case "rejected":
-      //     getRequestsByStatus("rejected");
-      //     return;
-      // }
-    });
-  });
-  document.querySelectorAll(".reminder-btn").forEach((button) => {
-    button.addEventListener("click", function () {
-      const donorEmail = this.getAttribute("data-donor-email");
-      composeEmail(donorEmail);
     });
   });
   function composeEmail(donorEmail) {
@@ -230,114 +188,93 @@ function filltable(array) {
     // Open Gmail compose window after filling fields
     window.open(gmailUrl, "_blank");
   }
-
-  document.querySelectorAll(".reject-btn").forEach((button) => {
+  document.querySelectorAll(".reminder-btn").forEach((button) => {
     button.addEventListener("click", function () {
       const donorEmail = this.getAttribute("data-donor-email");
-      updateSpecificDocument(donorEmail, "rejected");
-      // let spinnerType = document.getElementById("spinner").value;
-      // switch (spinnerType) {
-      //   case "All":
-      //     getRequests();
-      //     return;
-      //   case "pending":
-      //     getRequestsByStatus("pending");
-      //     return;
-      //   case "accepted":
-      //     getRequestsByStatus("accepted");
-      //     return;
-      //   case "rejected":
-      //     getRequestsByStatus("rejected");
-      //     return;
-      // }
+      composeEmail(donorEmail);
+    });
+  });
+
+  document.querySelectorAll(".accept-btn").forEach((button) => {
+    button.addEventListener("click", async function () {
+      const donorEmail = this.getAttribute("data-donor-email");
+      const donorBloodType = this.getAttribute("data-donor-bloodType");
+      const donorBloodQuantity = this.getAttribute("data-donor-bloodQuantity");
+      await updateRequestStatus(donorEmail, "accepted");
+      await updateBloodBank(donorBloodType, donorBloodQuantity);
+    });
+  });
+
+  document.querySelectorAll(".reject-btn").forEach((button) => {
+    button.addEventListener("click", async function () {
+      const donorEmail = this.getAttribute("data-donor-email");
+      await updateRequestStatus(donorEmail, "rejected");
     });
   });
 }
 
-async function updateBloodBank(email, bloodType, bloodQuantity) {
+async function updateBloodBank(bloodType, bloodQuantity) {
   const docRef = doc(db, "BloodBanks", localStorage.getItem("email"));
-
-  // Update the blood type field by the specified amount
   await updateDoc(docRef, { [bloodType]: increment(bloodQuantity) });
-
-  // Log a message to indicate that the update was successful
   console.log(`Updated ${bloodType} by ${bloodQuantity}`);
 }
 
-async function updateSpecificDocument(donorEmail, action) {
-  let ref = doc(db, "DonationRequests", donorEmail);
-  await updateDoc(ref, {
-    status: action,
-  })
-    .then(() => {
-      console.log(`${action} request`);
-      const spinner = document.getElementById("spinner");
-      const selectedOption = spinner.options[spinner.selectedIndex].value;
+async function updateRequestStatus(donorEmail, status) {
+  const ref = doc(db, "DonationRequests", donorEmail);
+  await updateDoc(ref, { status });
 
-      // Only refresh the table if the selected option is "pending"
-      if (selectedOption === "pending") {
-        getRequestsByStatus("pending");
-      }
-      if (selectedOption === "all") {
-        getRequests()
-      }
-      if (selectedOption === "accepted") {
-        getRequestsByStatus("accepted");
-      }
-      if (selectedOption === "rejected") {
-        getRequestsByStatus("rejected");
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+  // Update the table based on the current filter
+  const selectedFilter = document.getElementById("spinner").value;
+  if (selectedFilter === "all") {
+    fetchRequests();
+  } else {
+    fetchRequestsByStatus(selectedFilter);
+  }
 }
 
-let navigation = document.querySelector(".navigation"),
-  toggle = document.querySelector(".toggle"),
-  main = document.querySelector(".main");
-
-toggle.onclick = function () {
-  navigation.classList.toggle("active");
-  main.classList.toggle("active");
-};
-document.getElementById("spinner").addEventListener("change", () => {
-  const spinner = document.getElementById("spinner");
-  const selectedOption = spinner.options[spinner.selectedIndex].value;
-
-  switch (selectedOption) {
-    case "pending":
-      getRequestsByStatus("pending");
-      break;
-    case "accepted":
-      getRequestsByStatus("accepted");
-      break;
-    case "rejected":
-      getRequestsByStatus("rejected");
-      break;
-    case "all":
-      getRequests();
-      break;
-    default:
-      break;
-  }
-});
-async function getRequestsByStatus(status) {
-  let test = [];
+async function fetchRequestsByStatus(status) {
+  const centerEmail = localStorage.getItem("email");
   const q = query(
     donationRequestCollectionRef,
-    where("centerEmail", "==", localStorage.getItem("email")),
+    where("centerEmail", "==", centerEmail),
     where("status", "==", status)
   );
 
   try {
     const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-      test.push({ donorEmail: doc.id, data: doc.data() });
-    });
-    console.log("the test is", test);
-    await getDonorInfo(test);
+    const requests = querySnapshot.docs.map((doc) => ({
+      donorEmail: doc.id,
+      data: doc.data(),
+    }));
+    const donorInfos = await fetchDonorInfo(requests);
+    fillTable(donorInfos);
   } catch (error) {
-    console.error("Error getting documents: ", error);
+    console.error("Error fetching requests:", error);
   }
 }
+
+function filterRequests() {
+  const selectedStatus = document.getElementById("spinner").value;
+  if (selectedStatus === "all") {
+    fetchRequests();
+  } else {
+    fetchRequestsByStatus(selectedStatus);
+  }
+}
+
+function signOut() {
+  const confirmation = confirm("Are you sure you want to logout?");
+  if (confirmation) {
+    localStorage.clear();
+    window.location.href = "../index.html";
+  }
+}
+
+const navigation = document.querySelector(".navigation");
+const toggle = document.querySelector(".toggle");
+const main = document.querySelector(".main");
+
+toggle.addEventListener("click", () => {
+  navigation.classList.toggle("active");
+  main.classList.toggle("active");
+});
