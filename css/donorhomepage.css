@@ -1,0 +1,37 @@
+*{
+    
+}
+body{overflow-x: hidden;}
+#test{
+    /* margin-top: 50px;
+    height: 15vw;
+    width: 50%; */
+}
+#test img{
+    object-fit: contain;
+   
+}
+.card{
+    border: solid 4px #f1e3e4 !important;
+    border-radius: 10px !important;
+}
+.qoute-style{
+    text-shadow: 6px 5px 5px #f1e3e4;
+    color: #af0c1e;
+    font-style: italic;
+    font-weight: 500;
+    color: #489626;
+background-image: -webkit-linear-gradient(0deg, #489626 25%, #2f0bdb 52%);
+background-clip: text;
+-webkit-background-clip: text;
+text-fill-color: transparent;
+-webkit-text-fill-color: transparent;
+}
+.title-style{
+    text-align: center;
+    
+           color: #ff2724; background-image: -webkit-linear-gradient(45deg, #ff2724 56%, #3d251f 74%, #8ead78 25%); background-clip: text; -webkit-background-clip: text; text-fill-color: transparent; -webkit-text-fill-color: transparent;
+          
+        
+}
+

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css" />
+  <!-- Font Nunito -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+  <!-- Animate CSS -->
+
+  <link rel="stylesheet" type="text/css" href="../css/style.css" />
+  <link rel="shortcut icon" href="imgs/favicon.ico" />
+  <title>Register - Bleed To Save</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-image: linear-gradient(#fceeef, #ca9093, white);
+      height: 100%;
+
+    }
+
+    .bg-card-testing {
+      background-image: linear-gradient(white, rgb(230, 221, 221));
+    }
+  </style>
+</head>
+
+<body>
+  <nav id="mainNavbar"  class="navbar navbar-expand-lg navbar-light fixed-top py-0">
+    <div class="container">
+        <a href="../index.html" class="img-fluid navbar-brand"><img src="../imgs/nav-logo.png" class="img-hover"></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="justify-content-end collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav">
+                <li class="nav-item pr-2">
+                    <a href="../index.html" class="nav-link">Home</a>
+                </li>
+              
+               
+              
+                <li class="nav-item pr-2">
+                    <a href="../canyoudonate.html" class="nav-link">can you donate?</a>
+                </li>
+                
+                <li class="nav-item pr-2">
+                    <a href="./login.html" class="nav-link">login</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+  <!-- Register -->
+  <div class="container my-5">
+    <h1 style="" class="display-4 section-heading form-gap mb-5 text-center">
+      Medical Registration Form
+    </h1>
+  </div>
+  <div class="" style="display: flex; flex-direction: column; justify-content: center;align-items: center;">
+    <div class="container col-sm-12 col-md-11 col-lg-9"
+      style=" display: flex; justify-content: center; align-items: center;;">
+      <section class="container col-md-6  col-sm-10 col-lg-5 col-lg-10 "  >
+        <div class=" mb-5 login-form card shadow-lg bg-card-testing w-60 h-50 "
+          style="border-radius: 0px 25px 25px 0px;">
+          <div class="card-body my-4  ">
+            <div class="container ">
+
+              <form id="medical_registration_form">
+                <div class="row justify-content-center"   >
+                  <div class="form-group col-5 ">
+                    <label for="name_medical_center"
+                      style="display: flex; justify-content: center; font-weight: bold;">Medical
+                      Center Name</label>
+                    <input type="tel" class="form-control" id="name_medical_center" placeholder="Medical Center Name"
+                      required />
+                  </div>
+                  <div class="form-group col-5 ">
+                    <label for="phone_number">Phone Number</label>
+                    <input type="tel" class="form-control" id="phone_number" pattern="^[0-9]{3}-[0-9]{8}$"
+                      aria-describedby="phoneHelp" placeholder="Phone Number" required />
+                    <small id="phoneHelp" class="mt-2 form-text text-muted">Format: 123-12345678</small>
+                  </div>
+                </div>
+                <div class="row justify-content-center">
+                  <div class="form-group col-5 ">
+                    <label for="country">Country</label>
+                    <select class="form-control" id="country">
+                      <option value="" selected disabled>Select Country</option>
+                      <option value="LB">Lebanon</option>
+                      
+                    </select>
+                    <!-- 
+                       "Beirut",
+        "Mount Lebanon",
+        "North Governorate",
+        "South Governorate",
+        "Beqaa Governorate",
+        "Baalbek-Hermel Governorate",
+                     -->
+                  </div>
+                  <div class="form-group col-5" id="province-group">
+                    <label for="province">Province</label>
+                    <select class="form-control" id="province" required>
+                      <option value="" disabled selected>Select Province</option>
+                      <option value="Beirut">Beirut</option>
+                      <option value="South Lebanon">South Lebanon</option>
+                      <option value="North Lebanon">North Lebanon</option>
+                      <option value="Mount Lebanon">Mount Lebanon</option>
+                      <option value="Bekaa">Bekaa</option>
+                      <option value="Nabatieh">Nabatieh</option>
+                      <option value="Akkar">Akkar</option>
+                      <option value="Baabda">Baabda</option>
+                      <option value="Baalbek-Hermel">Baalbek-Hermel</option>
+                    </select>
+                  </div>
+                  <div class="form-group col-5" id="city-group">
+                    <label for="city">City</label>
+                     <select class="form-control" id="city" required>
+                    <option value="" disabled selected>Select City</option>
+                   </select>
+                  </div>
+                </div>
+                
+              
+
+               </div>
+
+                
+                <div class="form-row" id="coordinates-group" style="display: none;">
+                  <div class="form-group col-md-6">
+                    <label for="longitude">Longitude</label>
+                    <input type="number" step="0.01" class="form-control" id="longitude" placeholder="Longitude">
+                  </div>
+                  <div class="form-group col-md-6">
+                    <label for="latitude">Latitude</label>
+                    <input type="number" step="0.01" class="form-control" id="latitude" placeholder="Latitude">
+                  </div>
+                </div>
+                <!-- <div class="form-group">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="auto-fill">
+                    <label class="form-check-label" for="auto-fill">Auto fill from GPS</label>
+                  </div>
+                </div> -->
+                <hr>
+                <div class="form-group">
+                  <table class="text-center mx-auto">
+                    <tr>
+                      <th style="width: 20%;">Day</th>
+                      <th style="width: 10%;"></th>
+                      <th style="width: 70%; text-align: center;">Opening Hours</th>
+                    </tr>
+                    <tr style="border-bottom: 1px solid black;"></tr>
+                    <td>
+                      <label for="monday">Monday</label>
+                    </td>
+                    <td style="text-align: center;">
+                      <input type="checkbox" id="monday-switch" checked>
+                    </td>
+                    <td style="text-align: center;">
+                      <input type="time" id="monday-open" required> &nbsp;&nbsp;to&nbsp;&nbsp; <input type="time"
+                        id="monday-close" required>
+                    </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <label for="tuesday">Tuesday</label>
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="checkbox" id="tuesday-switch" checked>
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="time" id="tuesday-open" required> &nbsp;&nbsp;to&nbsp;&nbsp; <input type="time"
+                          id="tuesday-close" required>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <label for="wednesday">Wednesday</label>
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="checkbox" id="wednesday-switch" checked>
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="time" id="wednesday-open" required> &nbsp;&nbsp;to&nbsp;&nbsp; <input type="time"
+                          id="wednesday-close" required>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <label for="thursday">Thursday</label>
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="checkbox" id="thursday-switch" checked>
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="time" id="thursday-open" required> &nbsp;&nbsp;to&nbsp;&nbsp; <input type="time"
+                          id="thursday-close" required>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <label for="friday">Friday</label>
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="checkbox" id="friday-switch" checked>
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="time" id="friday-open" required> &nbsp;&nbsp;to&nbsp;&nbsp; <input type="time"
+                          id="friday-close" required>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <label for="saturday">Saturday</label>
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="checkbox" id="saturday-switch" checked>
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="time" id="saturday-open" required> &nbsp;&nbsp;to&nbsp;&nbsp; <input type="time"
+                          id="saturday-close" required>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <label for="sunday">Sunday</label>
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="checkbox" id="sunday-switch" checked>
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="time" id="sunday-open" required> &nbsp;&nbsp;to&nbsp;&nbsp; <input type="time"
+                          id="sunday-close" required>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+                <hr>
+
+                <div class="form-group">
+                  <label for="email">Email</label>
+                  <input type="email" class="form-control" id="email" placeholder="Email" required />
+                </div>
+                <div class="form-group">
+                  <label for="password">Password</label>
+                  <input type="password" class="form-control" id="password" placeholder="Password" minlength="8"
+                    required />
+                </div>
+                <div style="display: flex; justify-content: center;">
+                 
+              </form>
+             
+              </div>
+              <button class="btn  shadow-lg " id="medical-reg-btn"
+              style=" padding: 12px 18px; border-radius: 12px;background-color: #df5f65;color: white;font-size: 1.7rem;font-weight: 800;letter-spacing: 1px; ">
+              Register Now
+            </button>
+            </div>
+          </div>
+      </section>
+    </div>
+  </div>
+
+
+  <!-- <script type="module" src="./js/auth.js"></script> -->
+  <script type="module" src="./js/medicalRegister.js"></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js " integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj " crossorigin="anonymous "></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js " integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN " crossorigin="anonymous "></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js " integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV " crossorigin="anonymous "></script>
+  
+  <!-- <script type="module" src="./js/saad-auth.js"></script> -->
+</body>
+
+</html>
